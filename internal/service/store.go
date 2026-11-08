@@ -62,7 +62,7 @@ import (
 // forgetting `account_id`; here the guard for "a query forgot a column" is that
 // there is nowhere to write one.
 const assetColumns = `id, account_id, owner_user_id, kind, original_filename,
-	content_type, byte_size, checksum, status, metadata, created_at, updated_at, storage_key`
+	content_type, byte_size, checksum, status, metadata, created_at, updated_at, storage_key, application_key`
 
 const variantColumns = `id, asset_id, account_id, kind, content_type, byte_size,
 	storage_key, width, height, metadata, created_at, updated_at`
@@ -107,11 +107,11 @@ func insertAsset(ctx context.Context, tx pgx.Tx, a domain.Asset) (*domain.Asset,
 			id, account_id, owner_user_id, kind, original_filename,
 			content_type, byte_size, checksum, storage_key, status, metadata,
 			created_at, updated_at)
-		values ($1, (select anywaye.current_account_id()), $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11, $12)
+		values ($1, (select anywaye.current_account_id()), $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11, $12, $13)
 		returning `+assetColumns,
 		a.ID, a.OwnerUserID, string(a.Kind), a.OriginalFilename, a.ContentType,
 		a.ByteSize, a.Checksum, a.StorageKey(), string(a.Status), metadata,
-		a.CreatedAt, a.UpdatedAt)
+		a.CreatedAt, a.UpdatedAt, a.ApplicationKey)
 
 	asset, err := scanAsset(row)
 	if err != nil {
@@ -356,13 +356,14 @@ type assetRow struct {
 	createdAt        time.Time
 	updatedAt        time.Time
 	storageKey       string
+	applicationKey   string
 }
 
 func (r *assetRow) dest() []any {
 	return []any{
 		&r.id, &r.accountID, &r.ownerUserID, &r.kind, &r.originalFilename,
 		&r.contentType, &r.byteSize, &r.checksum, &r.status, &r.metadata,
-		&r.createdAt, &r.updatedAt, &r.storageKey,
+		&r.createdAt, &r.updatedAt, &r.storageKey, &r.applicationKey,
 	}
 }
 
@@ -409,6 +410,7 @@ func scanAsset(row rowScanner) (*domain.Asset, error) {
 		Metadata:         metadata,
 		CreatedAt:        r.createdAt,
 		UpdatedAt:        r.updatedAt,
+		ApplicationKey:   r.applicationKey,
 	}
 	return ptr(asset.WithStorageKey(r.storageKey)), nil
 }

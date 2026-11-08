@@ -169,6 +169,7 @@ type Asset struct {
 	OwnerUserID      string
 	Kind             AssetKind
 	OriginalFilename string
+	ApplicationKey   string
 	ContentType      string
 	ByteSize         int64
 	Checksum         string
