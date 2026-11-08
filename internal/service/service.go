@@ -426,12 +426,13 @@ func (s *Service) CompleteUpload(ctx context.Context, caller Caller, assetID, cl
 		}
 		ready = row
 		return enqueue(ctx, tx, NewEvent(EventAssetReady, row.ID, now(), map[string]any{
-			"asset_id":      row.ID,
-			"owner_user_id": row.OwnerUserID,
-			"kind":          row.Kind.String(),
-			"content_type":  row.ContentType,
-			"byte_size":     row.ByteSize,
-			"checksum":      row.Checksum,
+			"asset_id":        row.ID,
+			"owner_user_id":   row.OwnerUserID,
+			"kind":            row.Kind.String(),
+			"content_type":    row.ContentType,
+			"byte_size":       row.ByteSize,
+			"checksum":        row.Checksum,
+			"application_key": row.ApplicationKey,
 		}))
 	})
 	if commitErr != nil {
@@ -706,13 +707,14 @@ func (s *Service) CreateVariant(ctx context.Context, caller Caller, assetID stri
 		}
 		stored = row
 		return enqueue(ctx, tx, NewEvent(EventVariantCreated, row.ID, at, map[string]any{
-			"variant_id":   row.ID,
-			"asset_id":     asset.ID,
-			"kind":         row.Kind.String(),
-			"content_type": row.ContentType,
-			"byte_size":    row.ByteSize,
-			"width":        row.Width,
-			"height":       row.Height,
+			"variant_id":      row.ID,
+			"asset_id":        asset.ID,
+			"kind":            row.Kind.String(),
+			"content_type":    row.ContentType,
+			"byte_size":       row.ByteSize,
+			"width":           row.Width,
+			"height":          row.Height,
+			"application_key": asset.ApplicationKey,
 		}))
 	})
 	if commitErr != nil {
